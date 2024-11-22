@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace TelegramBot
 {
-    internal class TelegramBotDbContext: DbContext
+    public class TelegramBotDbContext: DbContext
     {
         public TelegramBotDbContext(DbContextOptions<TelegramBotDbContext> options)
             : base(options)
@@ -10,5 +11,7 @@ namespace TelegramBot
 
         }
         public DbSet<UserTask> UserTasks { get; set; }
+
+        
     }
 }

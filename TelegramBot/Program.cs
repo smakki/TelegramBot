@@ -22,10 +22,12 @@ namespace TelegramBot
                 return new(token);
             });
             builder.Services.AddTransient<BotInteractionService>();
+            builder.Services.AddSingleton<DatabaseServices>();
             builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             
             var host = builder.Build();
-            
+            AppContext.SetSwitch("System.Globalization.Invariant", true);
+            TimeZoneInfo.ClearCachedData();
             host.Run();
         }
     }

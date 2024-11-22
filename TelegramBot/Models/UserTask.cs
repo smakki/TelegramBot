@@ -9,5 +9,6 @@ namespace TelegramBot
         public DateTime AddedDate { get; set; }
         public DateTime TaskDate { get; set; }
         public DateTime NotificationDate { get; set; }
+        public bool Notificated { get; set; }
     }
 }
