@@ -24,7 +24,7 @@ namespace TelegramBot
 
         public async Task SendNotification(UserTask Task, CancellationToken token)
         {
-            var Notifacation = $"{Task.Message} в {Task.TaskDate}";
+            var Notifacation = String.Format(Texts.NotificationMessage,Task.Message);
             await _client.SendMessage(Task.TelegramId, Notifacation, Texts.parseMode, replyMarkup: new ReplyKeyboardRemove(), cancellationToken: token);
         }
 
@@ -63,9 +63,16 @@ namespace TelegramBot
             switch (query.Data)
             {
                 case var s when s.StartsWith("yes-add-task"):
+                    
                     var queryId = s.Split(':')[1];
-                    await _dbService.AddUserTaskAsync(query.Message.Chat.Id, userSessions[Guid.Parse(queryId)],token);
-                    await _client.EditMessageText(query.Message.Chat.Id,messageId:query.Message.Id,text:query.Message.Text, replyMarkup: null, cancellationToken: token);
+                    var task = userSessions[Guid.Parse(queryId)];
+                     var userTask = _dbService.AddUserTaskAsync(query.Message.Chat.Id, task, token);
+                    await _client.EditMessageText(
+                        query.Message.Chat.Id,
+                        messageId:query.Message.Id,
+                        text:String.Format(Texts.NotificationAddedSuccess, task.Text, userTask.NotificationDate), 
+                        replyMarkup: null, 
+                        cancellationToken: token);
                     break;
                 default:
                     break;
@@ -82,6 +89,7 @@ namespace TelegramBot
             switch (text)
             {
                 case "/start":
+                    _dbService.AddUser(chatId, message.Chat.Username, token);
                     await SendStartMessage(chatId, token);
                     break;
                 default:

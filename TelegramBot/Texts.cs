@@ -29,5 +29,23 @@
             """;
         public static string[] StartMessages = new string[] { StartMessage, StartMessage2 };
         public static string ClarificationMessage = "Добавить задачу с именем {0} на дату {1}?";
+
+        public static string NotificationAddedSuccess = """
+            ✅ Задача добавлена!
+
+            🗒 Что делать: {0}
+            📅 Когда: {1}
+
+            ⏰ Я напомню об этом вовремя! 💪
+            """;
+
+        public static string NotificationMessage = """
+            ⏰ Напоминание!
+
+            🗒 Задача: {0}
+            📅 Время: Сейчас
+
+            Действуй! Ты справишься 💪
+            """;
     }
 }

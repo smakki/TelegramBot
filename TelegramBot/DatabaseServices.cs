@@ -10,7 +10,7 @@ namespace TelegramBot
         {
             _scopeFactory = scopeFactory;
         }
-        public async Task AddUserTaskAsync(long TelegramId, HorsParseResult Task, CancellationToken token)
+        public  UserTask AddUserTaskAsync(long TelegramId, HorsParseResult Task, CancellationToken token)
         {
             var TaskDate = Task.Dates[0].DateFrom.ToUniversalTime();
             var task = new UserTask
@@ -24,7 +24,8 @@ namespace TelegramBot
             using var scope = _scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             dbService.UserTasks.Add(task);
-            await dbService.SaveChangesAsync(token);
+            dbService.SaveChangesAsync(token);
+            return task;
         }
 
         public async Task TaskNotificatedAsync(UserTask Task, CancellationToken token)
@@ -42,6 +43,15 @@ namespace TelegramBot
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             var tenSecond = DateTime.UtcNow.AddSeconds(10);
             return dbService.UserTasks.Where(obj => obj.NotificationDate <= tenSecond & !obj.Notificated).ToList();
+        }
+
+        public async Task AddUser(long TelegramId, string Name, CancellationToken token)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+            
+            dbService.Users.AddIfNotExists(new Users { Name = Name, Id = TelegramId },obj=>obj.Id ==TelegramId);
+            dbService.SaveChanges();
         }
     }
 }

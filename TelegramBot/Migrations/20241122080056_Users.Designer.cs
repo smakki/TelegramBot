@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TelegramBot;
@@ -11,9 +12,11 @@ using TelegramBot;
 namespace TelegramBot.Migrations
 {
     [DbContext(typeof(TelegramBotDbContext))]
-    partial class TelegramBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241122080056_Users")]
+    partial class Users
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,15 +62,18 @@ namespace TelegramBot.Migrations
 
             modelBuilder.Entity("TelegramBot.Users", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long>("TelegramId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
