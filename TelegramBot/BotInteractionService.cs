@@ -5,6 +5,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 
+
 namespace TelegramBot
 {
     public class BotInteractionService
@@ -55,7 +56,27 @@ namespace TelegramBot
                 );
             userSessions.Add(queryId, task);
             await _client.SendMessage(chatId, String.Format(Texts.ClarificationMessage, TaskName, TaskDate), Texts.parseMode, replyMarkup: InlineKeyboard, cancellationToken: token);
+        }
 
+        private async Task SendActualTasksMessage(long chatId, CancellationToken token)
+        {
+            InlineKeyboardMarkup InlineKeyboard = new(
+                new InlineKeyboardButton() { Text = "✏️ Редактировать", CallbackData = $"edit-task" },
+                new InlineKeyboardButton() { Text = "🗑️ Удалить", CallbackData = $"delete-task" }
+                );
+            var num = 1;
+            _dbService.GetActualUserTasks(chatId, token).ForEach(task =>
+            {
+                if (num == 1) _client.SendMessage(chatId, "🗂 Ваши задачи:",cancellationToken: token);
+                _client.SendMessage(chatId, 
+                    String.Format(Texts.TaskFromTasksList, num, task.Message, task.TaskDate),
+                    Texts.parseMode,
+                    replyMarkup:InlineKeyboard, 
+                    cancellationToken: token
+                    );
+                Task.Delay(10);
+                num++;
+            });
         }
 
         public async Task UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
@@ -117,7 +138,7 @@ namespace TelegramBot
                     await SendStartMessage(chatId, token);
                     break;
                 case "/mytasks":
-
+                    await SendActualTasksMessage(chatId,token);
                     break;
                 default:
                     var Hors = new HorsTextParser();
