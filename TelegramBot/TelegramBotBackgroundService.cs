@@ -37,8 +37,8 @@ namespace TelegramBot
                 var UpcomingNotifications = _dbService.GetUpcomingTasks(token);
                 foreach (var task in UpcomingNotifications)
                 {
-                    await _botInteractionService.SendNotification(task, token);
-                    _dbService.TaskNotificatedAsync(task,token);
+                    await _botInteractionService.SendReminder(task, token);
+                    await _dbService.TaskNotificatedAsync(task,token);
                 }
                 
                 

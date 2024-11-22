@@ -24,6 +24,12 @@ namespace TelegramBot
         {
             
             var bot = new TelegramBotClient(_options.Token);
+            var commands = new BotCommand[] { 
+                new BotCommand() { Command = "/mytasks",Description = "Мои задачи"},
+                new BotCommand() { Command = "/settings",Description = "Настройки"},
+                new BotCommand() { Command = "/help",Description = "Помощь"}
+            };
+            await bot.SetMyCommands(commands, cancellationToken: stoppingToken);
             _logger.LogInformation("bot started");
             ReceiverOptions recieverOptions = new()
             {

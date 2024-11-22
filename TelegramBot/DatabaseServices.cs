@@ -53,5 +53,12 @@ namespace TelegramBot
             dbService.Users.AddIfNotExists(new Users { Name = Name, Id = TelegramId },obj=>obj.Id ==TelegramId);
             dbService.SaveChanges();
         }
+
+        public List<UserTask> GetActualUserTasks(long TelegramId, CancellationToken token)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+            return dbService.UserTasks.Where(obj => obj.TelegramId == TelegramId & !obj.Completed).ToList();
+        }
     }
 }
