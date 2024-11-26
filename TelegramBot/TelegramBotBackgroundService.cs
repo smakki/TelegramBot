@@ -33,15 +33,21 @@ namespace TelegramBot
 
             while (!token.IsCancellationRequested)
             {
-                //await _botClient.SendMessage(_options.AdminId, "test");
-                var UpcomingNotifications = _dbService.GetUpcomingTasks(token);
-                foreach (var task in UpcomingNotifications)
+                var UpcomingReminders = _dbService.GetTasksForReminder(token);
+                foreach (var task in UpcomingReminders)
                 {
                     await _botInteractionService.SendReminder(task, token);
-                    await _dbService.TaskNotificatedAsync(task,token);
+                    task.Remindered = true;
+                    await _dbService.TaskUpdateAsync(task,token);
                 }
-                
-                
+
+                var UpcomingNotifications = _dbService.GetTasksForNotification(token);
+                foreach (var task in UpcomingNotifications)
+                {
+                    await _botInteractionService.SendNotification(task, token);
+                    task.Notificated = true;
+                    await _dbService.TaskUpdateAsync(task, token);
+                }
 
                 try
                 {

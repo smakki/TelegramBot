@@ -21,7 +21,7 @@ namespace TelegramBot
                 var token = serviceProvider.GetRequiredService<IOptions<TelegramOptions>>().Value.Token;
                 return new(token);
             });
-            builder.Services.AddTransient<BotInteractionService>();
+            builder.Services.AddSingleton<BotInteractionService>();
             builder.Services.AddSingleton<DatabaseServices>();
             builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             

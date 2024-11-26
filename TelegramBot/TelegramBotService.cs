@@ -24,7 +24,8 @@ namespace TelegramBot
         {
             
             var bot = new TelegramBotClient(_options.Token);
-            var commands = new BotCommand[] { 
+            var commands = new BotCommand[] {
+                new BotCommand() { Command = "/start",Description = "Старт бота"},
                 new BotCommand() { Command = "/mytasks",Description = "Мои задачи"},
                 new BotCommand() { Command = "/settings",Description = "Настройки"},
                 new BotCommand() { Command = "/help",Description = "Помощь"}
@@ -63,7 +64,7 @@ namespace TelegramBot
 
         private async Task UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
         {
-            await _botInteractionService.UpdateHandler(client, update, token);
+            await _botInteractionService.UpdateHandler(update, token);
         }
     }
 }

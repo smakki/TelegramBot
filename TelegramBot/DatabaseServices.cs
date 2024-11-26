@@ -1,7 +1,4 @@
-﻿using Hors.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace TelegramBot
+﻿namespace TelegramBot
 {
     public class DatabaseServices
     {
@@ -10,39 +7,36 @@ namespace TelegramBot
         {
             _scopeFactory = scopeFactory;
         }
-        public  UserTask AddUserTaskAsync(long TelegramId, HorsParseResult Task, CancellationToken token)
+        public async Task AddUserTaskAsync(long TelegramId, UserTask Task, CancellationToken token)
         {
-            var TaskDate = Task.Dates[0].DateFrom.ToUniversalTime();
-            var task = new UserTask
-            {
-                TelegramId = TelegramId,
-                TaskDate = TaskDate,
-                Message = Task.Text,
-                AddedDate = DateTime.UtcNow.ToUniversalTime(),
-                NotificationDate = TaskDate.AddHours(-1).ToUniversalTime(),
-            };
             using var scope = _scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
-            dbService.UserTasks.Add(task);
-            dbService.SaveChangesAsync(token);
-            return task;
+            dbService.UserTasks.AddOrUpdateIfExists(Task);
+            await dbService.SaveChangesAsync(token);
         }
 
-        public async Task TaskNotificatedAsync(UserTask Task, CancellationToken token)
+        public async Task TaskUpdateAsync(UserTask Task, CancellationToken token)
         {
-            Task.Notificated = true;
             using var scope = _scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             dbService.Update(Task);
-            dbService.SaveChanges();
+            await dbService.SaveChangesAsync(token);
         }
 
-        public List<UserTask> GetUpcomingTasks(CancellationToken token)
+        public List<UserTask> GetTasksForReminder(CancellationToken token)
         {
             using var scope = _scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             var tenSecond = DateTime.UtcNow.AddSeconds(10);
-            return dbService.UserTasks.Where(obj => obj.NotificationDate <= tenSecond & !obj.Notificated).ToList();
+            return dbService.UserTasks.Where(obj => obj.TaskDate <= tenSecond & !obj.Remindered).ToList();
+        }
+
+        public List<UserTask> GetTasksForNotification(CancellationToken token)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+            var tenSecond = DateTime.UtcNow.AddSeconds(10);
+            return dbService.UserTasks.Where(obj => obj.ReminderDate <= tenSecond & !obj.Completed & !obj.Notificated).ToList();
         }
 
         public async Task AddUser(long TelegramId, string Name, CancellationToken token)
@@ -51,7 +45,7 @@ namespace TelegramBot
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             
             dbService.Users.AddIfNotExists(new Users { Name = Name, Id = TelegramId },obj=>obj.Id ==TelegramId);
-            dbService.SaveChanges();
+            await dbService.SaveChangesAsync(token);
         }
 
         public List<UserTask> GetActualUserTasks(long TelegramId, CancellationToken token)

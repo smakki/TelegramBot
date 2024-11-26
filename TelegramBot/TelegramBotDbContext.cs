@@ -24,5 +24,11 @@ namespace TelegramBot
             var exists = predicate != null ? dbSet.Any(predicate) : dbSet.Any();
             return !exists ? dbSet.Add(entity) : null;
         }
+
+        public static EntityEntry<T> AddOrUpdateIfExists<T>(this DbSet<T> dbSet, T entity, Expression<Func<T, bool>> predicate = null) where T : class, new()
+        {
+            var exists = predicate != null ? dbSet.Any(predicate) : dbSet.Any();
+            return !exists ? dbSet.Add(entity) : dbSet.Update(entity);
+        }
     }
 }
