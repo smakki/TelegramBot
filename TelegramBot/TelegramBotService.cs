@@ -7,32 +7,26 @@ using TelegramBot.Options;
 
 namespace TelegramBot
 {
-    public class TelegramBotService : BackgroundService
+    public class TelegramBotService(
+        ILogger<TelegramBotService> logger,
+        IOptions<TelegramOptions> telegramOptions,
+        BotInteractionService botInteractionService)
+        : BackgroundService
     {
-        private readonly ILogger<TelegramBotService> _logger;
-        private readonly BotInteractionService _botInteractionService;
-        private readonly TelegramOptions _options;
-
-        public TelegramBotService(ILogger<TelegramBotService> logger, IOptions<TelegramOptions> telegramOptions, BotInteractionService botInteractionService)
-        {
-            _logger = logger;
-            _options = telegramOptions.Value;
-            _botInteractionService = botInteractionService;
-        }
+        private readonly TelegramOptions _options = telegramOptions.Value;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            
             var bot = new TelegramBotClient(_options.Token);
-            var commands = new BotCommand[] {
-                new BotCommand() { Command = "/start",Description = "Старт бота"},
+            var commands = new[] {
+                new BotCommand { Command = "/start",Description = "Старт бота"},
                 new BotCommand() { Command = "/mytasks",Description = "Мои задачи"},
                 new BotCommand() { Command = "/settings",Description = "Настройки"},
                 new BotCommand() { Command = "/help",Description = "Помощь"}
             };
             await bot.SetMyCommands(commands, cancellationToken: stoppingToken);
-            _logger.LogInformation("bot started");
-            ReceiverOptions recieverOptions = new()
+            logger.LogInformation("bot started");
+            ReceiverOptions receiverOptions = new()
             {
                 AllowedUpdates = []
             };
@@ -41,7 +35,7 @@ namespace TelegramBot
                 await bot.ReceiveAsync(
                     updateHandler: UpdateHandler,
                     errorHandler: ErrorHandlerAsync,
-                    receiverOptions: recieverOptions,
+                    receiverOptions: receiverOptions,
                     cancellationToken: stoppingToken);
             }
         }
@@ -52,11 +46,11 @@ namespace TelegramBot
             {
                 case ApiRequestException apiRequestException:
                     var messageError = $"Telegram API error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}";
-                    _logger.LogError(apiRequestException, messageError);
+                    logger.LogError(apiRequestException, messageError);
                     return Task.CompletedTask;
                 default:
                     messageError = exception.ToString();
-                    _logger.LogError(messageError);
+                    logger.LogError(messageError);
                     return Task.CompletedTask;
             }
 
@@ -64,7 +58,7 @@ namespace TelegramBot
 
         private async Task UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
         {
-            await _botInteractionService.UpdateHandler(update, token);
+            await botInteractionService.UpdateHandler(update, token);
         }
     }
 }

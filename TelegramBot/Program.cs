@@ -6,7 +6,7 @@ using TelegramBot.Options;
 
 namespace TelegramBot
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {
@@ -14,15 +14,16 @@ namespace TelegramBot
             builder.Services.AddHostedService<TelegramBotService>();
             builder.Services.AddHostedService<TelegramBotBackgroundService>();
             builder.Services.AddDbContext<TelegramBotDbContext>(options =>
-                    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
+                    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresSQL")));
 
             builder.Services.AddTransient<ITelegramBotClient, TelegramBotClient>(serviceProvider =>
             {
                 var token = serviceProvider.GetRequiredService<IOptions<TelegramOptions>>().Value.Token;
-                return new(token);
+                return new TelegramBotClient(token);
             });
             builder.Services.AddSingleton<BotInteractionService>();
             builder.Services.AddSingleton<DatabaseServices>();
+            builder.Services.AddSingleton<TelegramUtils>();
             builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             
             var host = builder.Build();

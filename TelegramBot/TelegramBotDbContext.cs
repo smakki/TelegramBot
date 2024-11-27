@@ -1,19 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
+using TelegramBot.Models;
 
 namespace TelegramBot
 {
-    public class TelegramBotDbContext: DbContext
+    public class TelegramBotDbContext(DbContextOptions<TelegramBotDbContext> options) : DbContext(options)
     {
-        public TelegramBotDbContext(DbContextOptions<TelegramBotDbContext> options)
-            : base(options)
-        {
+        public DbSet<UserTask> UserTasks { get; init; }
 
-        }
-        public DbSet<UserTask> UserTasks { get; set; }
-
-        public DbSet<Users> Users { get; set; }
+        public DbSet<Users> Users { get; init; }
 
 
     }

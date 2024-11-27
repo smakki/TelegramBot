@@ -1,9 +1,12 @@
-namespace TelegramBot
+using System.ComponentModel.DataAnnotations;
+
+namespace TelegramBot.Models
 {
     public class UserTask
     {
         public int Id { get; set; }
         public long TelegramId { get; set; }
+        [MaxLength(100)]
         public string? Message { get; set; }
         public DateTime AddedDate { get; set; }
         public DateTime TaskDate { get; set; }
