@@ -31,4 +31,11 @@ public class TelegramUtils(ITelegramBotClient client, IOptions<TelegramOptions> 
         await client.DeleteMessage(chatId, messageId, token);
     } 
     
+    private InlineKeyboardMarkup CreateInlineKeyboard(params (string Text, string CallbackData)[][] rows)
+    {
+        return new InlineKeyboardMarkup(
+            rows.Select(row => row.Select(button => InlineKeyboardButton.WithCallbackData(button.Text, button.CallbackData)).ToArray())
+        );
+    }
+    
 }

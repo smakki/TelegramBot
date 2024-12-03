@@ -15,12 +15,13 @@ namespace TelegramBot
             builder.Services.AddHostedService<TelegramBotBackgroundService>();
             builder.Services.AddDbContext<TelegramBotDbContext>(options =>
                     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresSQL")));
-
+    
             builder.Services.AddTransient<ITelegramBotClient, TelegramBotClient>(serviceProvider =>
             {
                 var token = serviceProvider.GetRequiredService<IOptions<TelegramOptions>>().Value.Token;
                 return new TelegramBotClient(token);
             });
+            
             builder.Services.AddSingleton<BotInteractionService>();
             builder.Services.AddSingleton<DatabaseServices>();
             builder.Services.AddSingleton<TelegramUtils>();

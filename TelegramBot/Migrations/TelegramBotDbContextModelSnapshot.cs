@@ -22,7 +22,7 @@ namespace TelegramBot.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TelegramBot.UserTask", b =>
+            modelBuilder.Entity("TelegramBot.Models.UserTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,7 +40,8 @@ namespace TelegramBot.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Message")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("Notificated")
                         .HasColumnType("boolean");
@@ -65,7 +66,7 @@ namespace TelegramBot.Migrations
                     b.ToTable("UserTasks");
                 });
 
-            modelBuilder.Entity("TelegramBot.Users", b =>
+            modelBuilder.Entity("TelegramBot.Models.Users", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -75,7 +76,15 @@ namespace TelegramBot.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("ReminderToTaskMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TimeZone")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 

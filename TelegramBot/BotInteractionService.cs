@@ -1,6 +1,7 @@
 ﻿using Hors;
 using Hors.Models;
 using System.Collections.Concurrent;
+using Humanizer;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Models;
@@ -12,6 +13,7 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
 {
     private readonly ConcurrentDictionary<string, UserTask> _usersTasks = [];
     private readonly ConcurrentDictionary<long, string> _usersSteps = [];
+    private readonly Dictionary<string, Func<CallbackQuery, CancellationToken, Task>> _callbackHandlers;
 
     private async Task SendStartMessage(long chatId, CancellationToken token)
     {
@@ -160,6 +162,10 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
                 queryId = s.Split(':')[1];
                 await SaveTask(queryId, messageId, token);
                 break;
+            case var s when s.StartsWith("delete-task"):
+                queryId = s.Split(':')[1];
+                await dbService.TaskDeleteAsync(_usersTasks[queryId], token);
+                break;
             default:
                 await utils.SendMessageAdmin("Неизвесный Callback query \n\r" + query.Data, token);
                 break;
@@ -236,11 +242,38 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
             case "/mytasks":
                 await SendActualTasksMessage(chatId, token);
                 break;
+            case "/settings":
+                await SendSettingsMessage(chatId, token);
+                break;
             default:
                 var hors = new HorsTextParser();
                 var result = hors.Parse(text, DateTime.Now);
                 await SendClarificationMessage(chatId, result, token);
                 break;
+        }
+    }
+
+    private async Task SendSettingsMessage(long chatId, CancellationToken token)
+    {
+        InlineKeyboardMarkup inlineKeyboard = new(
+            new InlineKeyboardButton() { Text = "Часовой пояс", CallbackData = $"settings-timezone" },
+            new InlineKeyboardButton() { Text = "", CallbackData = $"settings-task" }
+        );
+        var user = dbService.GetUserById(chatId, token);
+        if (user != null)
+        {
+            user.ReminderToTaskMinutes %= 1440; // Ограничиваем диапазон до одного дня
+
+            int hours = user.ReminderToTaskMinutes / 60;
+            int minutes = user.ReminderToTaskMinutes % 60;
+
+            TimeOnly time = new TimeOnly(hours, minutes);
+            var message = string.Format(Texts.SettingsMessage, user.TimeZone, time.Humanize(new TimeOnly(0,0,0)));
+            await utils.SendTextMessage(chatId, message, inlineKeyboard, token);
+        }
+        else
+        {
+            await utils.SendTextMessage(chatId, "Не нашли пользователя", inlineKeyboard, token);
         }
     }
 }

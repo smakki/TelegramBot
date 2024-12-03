@@ -8,7 +8,7 @@ namespace TelegramBot
         {
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
-            dbService.UserTasks.AddOrUpdateIfExists(task);
+            dbService.UserTasks.AddOrUpdateIfExists(task, userTask => userTask.Id == task.Id);
             await dbService.SaveChangesAsync(token);
         }
 
@@ -17,6 +17,14 @@ namespace TelegramBot
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             dbService.Update(task);
+            await dbService.SaveChangesAsync(token);
+        }
+        
+        public async Task TaskDeleteAsync(UserTask task, CancellationToken token)
+        {
+            using var scope = scopeFactory.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+            dbService.UserTasks.Remove(task);
             await dbService.SaveChangesAsync(token);
         }
 
@@ -50,6 +58,13 @@ namespace TelegramBot
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             return dbService.UserTasks.Where(obj => obj.TelegramId == telegramId & !obj.Completed).ToList();
+        }
+        
+        public Users? GetUserById(long telegramId, CancellationToken token)
+        {
+            using var scope = scopeFactory.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+            return dbService.Users.FirstOrDefault(obj => obj.Id == telegramId);
         }
     }
 }
