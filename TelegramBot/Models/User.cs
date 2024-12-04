@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TelegramBot.Models
 {
-    public class Users
+    public class User
     {
         public long Id { get; set; }
         
@@ -15,10 +15,11 @@ namespace TelegramBot.Models
         public string? TimeZone {get; set;}
         
         public int ReminderToTaskMinutes{get; set;}
-
-        public Users()
+        
+        public List<UserTask>? Tasks { get; set; } = new ();
+        public User()
         {
-            TimeZone = "+3";
+            TimeZone = "Europe/Moscow";
             ReminderToTaskMinutes = 60;
         }
     }

@@ -25,6 +25,7 @@ namespace TelegramBot
             builder.Services.AddSingleton<BotInteractionService>();
             builder.Services.AddSingleton<DatabaseServices>();
             builder.Services.AddSingleton<TelegramUtils>();
+            builder.Services.AddSingleton<DateTimeUtils>();
             builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             
             var host = builder.Build();

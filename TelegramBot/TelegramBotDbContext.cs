@@ -9,9 +9,17 @@ namespace TelegramBot
     {
         public DbSet<UserTask> UserTasks { get; init; }
 
-        public DbSet<Users> Users { get; init; }
+        public DbSet<User> Users { get; init; }
 
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Настройка связи "один ко многим" между User и UserTask
+            modelBuilder.Entity<UserTask>()
+                .HasOne(ut => ut.User)
+                .WithMany(u => u.Tasks)
+                .HasForeignKey(ut => ut.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Удаление задач при удалении пользователя
+        }
     }
     public static class DbSetExtensions
     {

@@ -1,4 +1,5 @@
-﻿using TelegramBot.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using TelegramBot.Models;
 
 namespace TelegramBot
 {
@@ -7,6 +8,7 @@ namespace TelegramBot
         public async Task AddUserTaskAsync(long telegramId, UserTask task, CancellationToken token)
         {
             using var scope = scopeFactory.CreateScope();
+            task.User = null;
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             dbService.UserTasks.AddOrUpdateIfExists(task, userTask => userTask.Id == task.Id);
             await dbService.SaveChangesAsync(token);
@@ -17,6 +19,13 @@ namespace TelegramBot
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             dbService.Update(task);
+            await dbService.SaveChangesAsync(token);
+        }
+        public async Task UserUpdateAsync(User user, CancellationToken token)
+        {
+            using var scope = scopeFactory.CreateScope();
+            var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+            dbService.Update(user);
             await dbService.SaveChangesAsync(token);
         }
         
@@ -49,7 +58,7 @@ namespace TelegramBot
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
             
-            dbService.Users.AddIfNotExists(new Users { Name = name, Id = telegramId },obj=>obj.Id ==telegramId);
+            dbService.Users.AddIfNotExists(new User { Name = name, Id = telegramId },obj=>obj.Id ==telegramId);
             await dbService.SaveChangesAsync(token);
         }
 
@@ -57,10 +66,13 @@ namespace TelegramBot
         {
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
-            return dbService.UserTasks.Where(obj => obj.TelegramId == telegramId & !obj.Completed).ToList();
+            return dbService.UserTasks
+                .Include(task =>task.User )
+                .Where(obj => obj.TelegramId == telegramId & !obj.Completed)
+                .ToList();
         }
         
-        public Users? GetUserById(long telegramId, CancellationToken token)
+        public User? GetUserById(long telegramId, CancellationToken token)
         {
             using var scope = scopeFactory.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();

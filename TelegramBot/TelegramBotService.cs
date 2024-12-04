@@ -58,7 +58,13 @@ namespace TelegramBot
 
         private async Task UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
         {
-            await botInteractionService.UpdateHandler(update, token);
+            var handler = update switch
+            {
+                { Message: { } message } => botInteractionService.MessageTextHandler(message, token),
+                { CallbackQuery: { } query } => botInteractionService.CallbackQueryHandler(query, token),
+                _ => botInteractionService.UnknownMessageHandler(update, token)
+            };
+            await handler;
         }
     }
 }

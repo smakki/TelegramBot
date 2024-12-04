@@ -17,13 +17,23 @@ namespace TelegramBot.Models
         public bool Notificated { get; set; }
         public bool Completed { get; set; }
 
-        public UserTask(long telegramId, string message, DateTime taskDate)
+        public long UserId { get; set; }
+        public User? User { get; set; }
+        
+        public UserTask(User user, string message, DateTime taskDate)
         {
-            TelegramId = telegramId;
+            var TimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZone);
+            User = user;
+            UserId = user.Id;
+            TelegramId = user.Id;
             Message = message;
-            TaskDate = taskDate.ToUniversalTime();
-            ReminderDate = taskDate.AddHours(-1).ToUniversalTime();
-            AddedDate = DateTime.UtcNow.ToUniversalTime();
+            TaskDate = TimeZoneInfo.ConvertTimeToUtc(taskDate, TimeZone);
+            ReminderDate = TimeZoneInfo.ConvertTimeToUtc(taskDate.AddMinutes(-user.ReminderToTaskMinutes), TimeZone);
+            AddedDate = DateTime.UtcNow;
+            
+            // TaskDate = TimeZoneInfo.ConvertTimeFromUtc(taskDate, TimeZone);
+            // ReminderDate = TimeZoneInfo.ConvertTimeFromUtc(taskDate.AddMinutes(-user.ReminderToTaskMinutes), TimeZone);
+            // AddedDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZone);
         }
 
         public UserTask() { }
