@@ -17,7 +17,7 @@
                 foreach (var task in upcomingReminders)
                 {
                     await botInteractionService.SendReminder(task, token);
-                    task.Remindered = true;
+                    task.Reminded = true;
                     await dbService.TaskUpdateAsync(task,token);
                 }
 
@@ -25,7 +25,7 @@
                 foreach (var task in upcomingNotifications)
                 {
                     await botInteractionService.SendNotification(task, token);
-                    task.Notificated = true;
+                    task.Notified = true;
                     await dbService.TaskUpdateAsync(task, token);
                 }
 

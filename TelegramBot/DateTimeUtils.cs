@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
+using Humanizer;
 using TelegramBot.Models;
 
 namespace TelegramBot;
@@ -23,6 +24,11 @@ public class DateTimeUtils
         {
             return TimeZoneInfo.Local;
         }
+    }
+
+    public string GetPresentInterval(int interval)
+    {
+        return interval.Minutes().Humanize();
     }
     
 }

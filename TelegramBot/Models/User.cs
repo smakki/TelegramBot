@@ -11,8 +11,7 @@ namespace TelegramBot.Models
         public string Name { get; set; }
         
         [MaxLength(100)]
-        [DefaultValue("getutcdate()")]
-        public string? TimeZone {get; set;}
+        public string TimeZone {get; set;}
         
         public int ReminderToTaskMinutes{get; set;}
         

@@ -13,8 +13,8 @@ namespace TelegramBot.Models
         public DateTime ReminderDate { get; set; }
         public DateTime CompletionDate { get; set; }
         public int NumberOfSnoozes { get; set; }
-        public bool Remindered { get; set; }
-        public bool Notificated { get; set; }
+        public bool Reminded { get; set; }
+        public bool Notified { get; set; }
         public bool Completed { get; set; }
 
         public long UserId { get; set; }
@@ -22,13 +22,13 @@ namespace TelegramBot.Models
         
         public UserTask(User user, string message, DateTime taskDate)
         {
-            var TimeZone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZone);
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZone);
             User = user;
             UserId = user.Id;
             TelegramId = user.Id;
             Message = message;
-            TaskDate = TimeZoneInfo.ConvertTimeToUtc(taskDate, TimeZone);
-            ReminderDate = TimeZoneInfo.ConvertTimeToUtc(taskDate.AddMinutes(-user.ReminderToTaskMinutes), TimeZone);
+            TaskDate = TimeZoneInfo.ConvertTimeToUtc(taskDate, timeZone);
+            ReminderDate = TimeZoneInfo.ConvertTimeToUtc(taskDate.AddMinutes(-user.ReminderToTaskMinutes), timeZone);
             AddedDate = DateTime.UtcNow;
             
             // TaskDate = TimeZoneInfo.ConvertTimeFromUtc(taskDate, TimeZone);

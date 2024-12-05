@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Options;
 
@@ -37,5 +38,4 @@ public class TelegramUtils(ITelegramBotClient client, IOptions<TelegramOptions> 
             rows.Select(row => row.Select(button => InlineKeyboardButton.WithCallbackData(button.Text, button.CallbackData)).ToArray())
         );
     }
-    
 }

@@ -46,12 +46,18 @@ public class Keyboards
                     new InlineKeyboardButton() { Text = Texts.EdTask, CallbackData = $"edit-task:{queryId}" },
                     new InlineKeyboardButton() { Text = Texts.DelTask, CallbackData = $"delete-task:{queryId}" }
                 );
-            
+
             case "Settings":
-                return new InlineKeyboardMarkup(
-                    new InlineKeyboardButton() { Text = Texts.TimeZone, CallbackData = $"settings-timezone" },
-                    new InlineKeyboardButton() { Text = Texts.ReminderInterval, CallbackData = $"settings-interval-reminder" }
-                );
+                return new InlineKeyboardMarkup([
+                    [
+                        new InlineKeyboardButton() { Text = Texts.TimeZone, CallbackData = $"settings-timezone" },
+                        new InlineKeyboardButton()
+                            { Text = Texts.ReminderInterval, CallbackData = $"settings-interval-reminder" }
+                    ],
+                    [
+                        new InlineKeyboardButton() { Text = Texts.Cancel, CallbackData = $"cancel:{queryId}" }
+                    ]
+                ]);
             
             case "ConfirmTimeZone":
                 return new InlineKeyboardMarkup(
@@ -73,6 +79,11 @@ public class Keyboards
                         new InlineKeyboardButton { Text = Texts.Save, CallbackData = $"edit-save:{queryId}" }
                     ]
                 ]);
+            
+            case "Cancel":
+                return new InlineKeyboardMarkup(
+                    new InlineKeyboardButton() { Text = Texts.Cancel, CallbackData = $"cancel:{queryId}" }
+                ); 
             
             case "Remove":
                 return new ReplyKeyboardRemove();

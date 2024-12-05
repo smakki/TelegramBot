@@ -39,6 +39,7 @@ namespace TelegramBot.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("TimeZone")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -68,17 +69,17 @@ namespace TelegramBot.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<bool>("Notificated")
+                    b.Property<bool>("Notified")
                         .HasColumnType("boolean");
 
                     b.Property<int>("NumberOfSnoozes")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("Reminded")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("ReminderDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("Remindered")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("TaskDate")
                         .HasColumnType("timestamp with time zone");
