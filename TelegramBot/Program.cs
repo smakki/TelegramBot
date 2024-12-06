@@ -10,6 +10,7 @@ namespace TelegramBot
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddHostedService<TelegramBotService>();
             builder.Services.AddHostedService<TelegramBotBackgroundService>();

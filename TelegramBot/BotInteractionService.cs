@@ -39,14 +39,14 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         {
             _usersSteps.TryAdd(chatId, $"settings-interval-reminder");
             var message = string.Format(Texts.EditReminderInterval,
-                dateTimeUtils.GetPresentInterval(user.ReminderToTaskMinutes));
+                DateTimeUtils.GetPresentInterval(user.ReminderToTaskMinutes));
             await utils.SendTextMessage(chatId, message, Keyboards.GetKeyboard("cancel"), token);
         }
     }
 
     private async Task SendConfirmTimeZoneMessage(long chatId, Location location, CancellationToken token)
     {
-        var tz = dateTimeUtils.GetTimeZoneByGeoLocation(location.Latitude, location.Longitude).Result;
+        var tz = DateTimeUtils.GetTimeZoneByGeoLocation(location.Latitude, location.Longitude).Result;
         _usersSteps.TryRemove(chatId, out _);
         var mes = string.Format(Texts.YourTimeZone, tz.DisplayName);
         await utils.SendTextMessage(chatId, mes, Keyboards.GetKeyboard("ConfirmTimeZone", tz.Id),
@@ -127,7 +127,7 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
             var timezone = TimeZoneInfo.FindSystemTimeZoneById(user.TimeZone);
 
             var message = string.Format(Texts.SettingsMessage, timezone.DisplayName,
-                dateTimeUtils.GetPresentInterval(user.ReminderToTaskMinutes));
+                DateTimeUtils.GetPresentInterval(user.ReminderToTaskMinutes));
             if (messageId != 0)
             {
                 await utils.EditTextMessage(chatId, messageId, message, Keyboards.GetKeyboard("Settings"), token);

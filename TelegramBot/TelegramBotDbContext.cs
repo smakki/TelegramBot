@@ -5,8 +5,14 @@ using TelegramBot.Models;
 
 namespace TelegramBot
 {
-    public class TelegramBotDbContext(DbContextOptions<TelegramBotDbContext> options) : DbContext(options)
+    public class TelegramBotDbContext : DbContext
     {
+        public TelegramBotDbContext(DbContextOptions<TelegramBotDbContext> options) : base(options)
+        {
+            Database.EnsureCreated();
+        }
+
+
         public DbSet<UserTask> UserTasks { get; init; }
 
         public DbSet<User> Users { get; init; }

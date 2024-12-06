@@ -7,7 +7,7 @@ namespace TelegramBot;
 
 public class DateTimeUtils
 {
-    public async Task<TimeZoneInfo> GetTimeZoneByGeoLocation(double latitude, double longitude)
+    public static async Task<TimeZoneInfo> GetTimeZoneByGeoLocation(double latitude, double longitude)
     {
         var uri = string.Format(CultureInfo.InvariantCulture,
             "https://api.geotimezone.com/public/timezone?latitude={0}&longitude={1}", latitude, longitude);
@@ -26,7 +26,7 @@ public class DateTimeUtils
         }
     }
 
-    public string GetPresentInterval(int interval)
+    public static string GetPresentInterval(int interval)
     {
         return interval.Minutes().Humanize();
     }
