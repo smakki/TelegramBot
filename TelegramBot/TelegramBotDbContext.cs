@@ -11,20 +11,26 @@ namespace TelegramBot
         {
             Database.EnsureCreated();
         }
-
-
+        
         public DbSet<UserTask> UserTasks { get; init; }
 
         public DbSet<User> Users { get; init; }
+        
+        public DbSet<LocationHistory> LocationHistory { get; init; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Настройка связи "один ко многим" между User и UserTask
             modelBuilder.Entity<UserTask>()
                 .HasOne(ut => ut.User)
                 .WithMany(u => u.Tasks)
                 .HasForeignKey(ut => ut.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // Удаление задач при удалении пользователя
+                .OnDelete(DeleteBehavior.Cascade); 
+            
+            modelBuilder.Entity<LocationHistory>()
+                .HasOne(loc => loc.User)
+                .WithMany(u => u.Locations)
+                .HasForeignKey(ut => ut.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
         }
     }
     public static class DbSetExtensions

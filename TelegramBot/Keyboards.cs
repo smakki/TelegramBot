@@ -11,17 +11,17 @@ public class Keyboards
         {
             case "Reminder":
                 return new InlineKeyboardMarkup(
-                    new InlineKeyboardButton() { Text = Texts.Snooze, CallbackData = $"retry-reminder" },
-                    new InlineKeyboardButton() { Text = Texts.Close, CallbackData = $"close-reminder" }
+                    new InlineKeyboardButton() { Text = Texts.Snooze, CallbackData = $"retry-reminder:{queryId}" },
+                    new InlineKeyboardButton() { Text = Texts.Close, CallbackData = "cancel" }
                 );
-            
+
             case "Notification":
                 return new InlineKeyboardMarkup(
                     new InlineKeyboardButton() { Text = Texts.Complete, CallbackData = $"complete-task:{queryId}" },
                     new InlineKeyboardButton() { Text = Texts.Pass, CallbackData = $"pass-task:{queryId}" },
                     new InlineKeyboardButton() { Text = Texts.DelTask, CallbackData = $"delete-task:{queryId}" }
                 );
-            
+
             case "Clarification":
                 return new InlineKeyboardMarkup([
                     [
@@ -32,7 +32,7 @@ public class Keyboards
                         new InlineKeyboardButton() { Text = Texts.EdTask, CallbackData = $"edit-task:{queryId}" }
                     ]
                 ]);
-            
+
             case "Geolocation":
                 return new ReplyKeyboardMarkup(
                     new KeyboardButton(Texts.SendLocation) { RequestLocation = true })
@@ -40,12 +40,17 @@ public class Keyboards
                     ResizeKeyboard = true,
                     OneTimeKeyboard = true
                 };
-            
+
             case "ActualTask":
-                return new InlineKeyboardMarkup(
+                return new InlineKeyboardMarkup([
+                    [
                     new InlineKeyboardButton() { Text = Texts.EdTask, CallbackData = $"edit-task:{queryId}" },
                     new InlineKeyboardButton() { Text = Texts.DelTask, CallbackData = $"delete-task:{queryId}" }
-                );
+                    ],
+                    [
+                    new InlineKeyboardButton() { Text = Texts.Complete, CallbackData = $"complete-task:{queryId}" }
+                    ]
+                ]);
 
             case "Settings":
                 return new InlineKeyboardMarkup([

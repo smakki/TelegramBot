@@ -8,18 +8,21 @@ namespace TelegramBot.Models
         public long Id { get; set; }
         
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string? Username { get; set; }
         
         [MaxLength(100)]
-        public string TimeZone {get; set;}
+        public string? FirstName { get; set; }
         
-        public int ReminderToTaskMinutes{get; set;}
+        [MaxLength(100)]
+        public string? LastName { get; set; }
         
+        public List<LocationHistory> Locations { get; set; } = new List<LocationHistory>();
+        
+        [MaxLength(100)]
+        public string TimeZone {get; set;} = "Europe/Moscow";
+
+        public int ReminderToTaskMinutes{get; set;} = 60;
+        public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
         public List<UserTask>? Tasks { get; set; } = new ();
-        public User()
-        {
-            TimeZone = "Europe/Moscow";
-            ReminderToTaskMinutes = 60;
-        }
     }
 }

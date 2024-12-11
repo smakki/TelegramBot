@@ -22,6 +22,33 @@ namespace TelegramBot.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TelegramBot.Models.LocationHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LocationHistory");
+                });
+
             modelBuilder.Entity("TelegramBot.Models.User", b =>
                 {
                     b.Property<long>("Id")
@@ -30,8 +57,14 @@ namespace TelegramBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Name")
-                        .IsRequired()
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -40,6 +73,10 @@ namespace TelegramBot.Migrations
 
                     b.Property<string>("TimeZone")
                         .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Username")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -97,6 +134,17 @@ namespace TelegramBot.Migrations
                     b.ToTable("UserTasks");
                 });
 
+            modelBuilder.Entity("TelegramBot.Models.LocationHistory", b =>
+                {
+                    b.HasOne("TelegramBot.Models.User", "User")
+                        .WithMany("Locations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TelegramBot.Models.UserTask", b =>
                 {
                     b.HasOne("TelegramBot.Models.User", "User")
@@ -110,6 +158,8 @@ namespace TelegramBot.Migrations
 
             modelBuilder.Entity("TelegramBot.Models.User", b =>
                 {
+                    b.Navigation("Locations");
+
                     b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
