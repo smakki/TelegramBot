@@ -1,14 +1,39 @@
-import { useState, useEffect, ReactElement } from 'react';
-import { ICell } from 'bsr-table';
+import { useState, useEffect } from 'react';
 
-const useTableData = () => {
-    const [tableData, setTableData] = useState<(string | number | ReactElement | ICell)[][]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+export type ColumnConfig = {
+    key: string;
+    header: string;
+    transform?: (value: any) => React.ReactNode;
+}
+
+export const useTableData = (
+    columnsConfig: ColumnConfig[],
+    url: string,
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+    const [tableData, setTableData] = useState<{ [key: string]: string | number }[]>([]);
 
     const loadData = async () => {
         try {
-            const data = await getDataTable();
-            setTableData(data);
+            const response = await fetch(url);
+            const data = await response.json();
+
+            interface RawDataItem {
+                [key: string]: string | number | undefined;
+            }
+
+            const processedData = data.map((item: RawDataItem) => {
+                const processedItem: { [key: string]: any } = {};
+
+                columnsConfig.forEach(col => {
+                    processedItem[col.key] = col.transform
+                        ? col.transform(item[col.key])
+                        : item[col.key];
+                });
+
+                return processedItem;
+            });
+            setTableData(processedData);
         } finally {
             setIsLoading(false);
         }
@@ -16,39 +41,15 @@ const useTableData = () => {
 
     useEffect(() => {
         loadData();
-        const intervalId = setInterval(() => {
-            loadData();
-        }, 20000);
+        const intervalId = setInterval(loadData, 20000);
         return () => clearInterval(intervalId);
     }, []);
 
-    return { tableData, isLoading };
+    return {
+        tableData:tableData || [],
+    };
 };
 
-async function getDataTable(): Promise<(string | number | ReactElement | ICell)[][]> {
-    const url = "/stats";
 
-    try {
-        const response = await fetch(url);
 
-        if (!response.ok) {
-            throw new Error(`Ошибка HTTP: ${response.status}`);
-        }
 
-        const data = await response.json();
-
-        const dataArray = Array.isArray(data) ? data : [data];
-        return dataArray.map((item) => [
-            item.UserId,
-            item.UserName,
-            item.TotalTasks,
-            item.CompletedTasks,
-            item.LastCompletedTaskDate
-        ]);
-    } catch (error) {
-        console.error("Ошибка при получении данных:", error);
-        return [];
-    }
-}
-
-export default useTableData;

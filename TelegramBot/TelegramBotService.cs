@@ -1,23 +1,20 @@
-﻿using Microsoft.Extensions.Options;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using TelegramBot.Options;
 
 namespace TelegramBot
 {
     public class TelegramBotService(
+        ITelegramBotClient bot,
         ILogger<TelegramBotService> logger,
-        IOptions<TelegramOptions> telegramOptions,
         BotInteractionService botInteractionService)
         : BackgroundService
     {
-        private readonly TelegramOptions _options = telegramOptions.Value;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var bot = new TelegramBotClient(_options.Token);
+            
             var commands = new[] {
                 new BotCommand { Command = "/start",Description = "Старт бота"},
                 new BotCommand() { Command = "/mytasks",Description = "Мои задачи"},

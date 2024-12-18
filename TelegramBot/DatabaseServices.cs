@@ -119,4 +119,19 @@ public class DatabaseServices(IServiceScopeFactory scopeFactory)
             })
             .ToListAsync();
     }
+
+    public async Task<User[]> GetUsersAsync()
+    {
+        using var scope = scopeFactory.CreateScope();
+        var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+        return await dbService.Users.ToArrayAsync();
+    }
+
+    public async Task AddMessageAsync(BroadcastMessage message)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+        await dbService.BroadcastMessages.AddAsync(message);
+        await dbService.SaveChangesAsync();
+    }
 }

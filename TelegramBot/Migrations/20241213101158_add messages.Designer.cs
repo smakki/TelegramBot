@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TelegramBot;
@@ -11,9 +12,11 @@ using TelegramBot;
 namespace TelegramBot.Migrations
 {
     [DbContext(typeof(TelegramBotDbContext))]
-    partial class TelegramBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241213101158_add messages")]
+    partial class addmessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,9 +42,6 @@ namespace TelegramBot.Migrations
 
                     b.Property<DateTime>("SendingDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("Sent")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 

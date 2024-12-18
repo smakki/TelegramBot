@@ -1,0 +1,27 @@
+﻿services:
+  telegrambot:
+    image: telegrambot
+    build:
+      context: .
+      dockerfile: TelegramBot/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - Telegram__Token=${TELEGRAM_TOKEN}
+      - Telegram__AdminId=${TELEGRAM_ADMIN_ID}
+      - ConnectionStrings__PostgresSQL=${DB_CONNECTION_STRING}
+  
+  postgres:
+    hostname: pg
+    image: postgres
+    user: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+volumes:
+  pgdata:

@@ -234,6 +234,7 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
                 );
                 userTask.NumberOfSnoozes++;
                 await dbService.TaskUpdateAsync(userTask, token);
+                await utils.DeleteMessage(chatId, messageId, token);
                 break;
             case var s when s.StartsWith("cancel"):
                 await utils.DeleteMessage(chatId, messageId, token);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
+using TelegramBot.Models;
 using TelegramBot.Options;
 
 namespace TelegramBot
@@ -11,7 +12,6 @@ namespace TelegramBot
     {
         public static void Main(string[] args)
         {
-
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddHostedService<TelegramBotService>();
             builder.Services.AddHostedService<TelegramBotBackgroundService>();
@@ -23,7 +23,6 @@ namespace TelegramBot
                 var token = serviceProvider.GetRequiredService<IOptions<TelegramOptions>>().Value.Token;
                 return new TelegramBotClient(token);
             });
-            
             builder.Services.AddSingleton<BotInteractionService>();
             builder.Services.AddSingleton<DatabaseServices>();
             builder.Services.AddSingleton<TelegramUtils>();
@@ -33,9 +32,14 @@ namespace TelegramBot
             builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             
             var host = builder.Build();
+
+            var startup = new Startup(host.Services);
+            startup.Initialize(args);
+
             host.MapGet("/stats", (RouteHandlers handler, HttpContext context) =>handler.GetStatisticHandler(context));
-            AppContext.SetSwitch("System.Globalization.Invariant", true);
-            TimeZoneInfo.ClearCachedData();
+            host.MapGet("/users", (RouteHandlers handler, HttpContext context) =>handler.GetUsersHandler(context));
+            host.MapPost("/messages", (RouteHandlers handler, BroadcastMessage message) =>handler.PostMessageHandler(message));
+ 
             host.Run();
         }
     }
