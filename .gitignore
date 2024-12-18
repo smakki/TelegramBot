@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /.idea/.idea.TelegramBot/.idea
 /.idea/.idea.TelegramBot/Docker
 /TelegramBot/appsettings.json
+/TelegramBot/app/.idea
