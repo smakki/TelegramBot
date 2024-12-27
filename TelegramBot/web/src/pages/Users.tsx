@@ -1,6 +1,6 @@
 import React from 'react';
-import Table from '../components/Table';
-import Form from '../components/Form';
+import Table from '../components/Table.tsx';
+import Form from '../components/Form.tsx';
 
 const Users: React.FC = () => {
     return (

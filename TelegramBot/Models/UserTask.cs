@@ -19,7 +19,7 @@ namespace TelegramBot.Models
         public bool Completed { get; set; }
 
         public long UserId { get; set; }
-        public User? User { get; set; }
+        public User User { get; set; } = null!;
         
         public UserTask(User user, string message, DateTime taskDate)
         {

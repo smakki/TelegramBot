@@ -7,9 +7,8 @@ namespace TelegramBot;
 
 public class DatabaseServices(IServiceScopeFactory scopeFactory)
 {
-    public async Task AddUserTaskAsync(long telegramId, UserTask task, CancellationToken token)
+    public async Task AddUserTaskAsync(UserTask task, CancellationToken token)
     {
-        // var user = task.User;
         using var scope = scopeFactory.CreateScope();
         task.User = null;
         var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
@@ -46,7 +45,8 @@ public class DatabaseServices(IServiceScopeFactory scopeFactory)
         using var scope = scopeFactory.CreateScope();
         var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
         var tenSecond = DateTime.UtcNow.AddSeconds(10);
-        return dbService.UserTasks.Where(obj => (obj.ReminderDate <= tenSecond) & !obj.Reminded & !obj.Completed).ToList();
+        return dbService.UserTasks.Where(obj => (obj.ReminderDate <= tenSecond) & !obj.Reminded & !obj.Completed)
+            .ToList();
     }
 
     public List<UserTask> GetTasksForNotification(CancellationToken token)
@@ -109,9 +109,9 @@ public class DatabaseServices(IServiceScopeFactory scopeFactory)
                 UserId = user.Id,
                 UserName = user.Username,
                 Name = user.FirstName + " " + user.LastName,
-                TotalTasks = user.Tasks.Count(),
-                CompletedTasks = user.Tasks.Count(task => task.Completed),
-                LastCompletedTaskDate = user.Tasks
+                TotalTasks = user.Tasks == null ? 0 : user.Tasks.Count,
+                CompletedTasks = user.Tasks == null ? 0 : user.Tasks.Count(task => task.Completed),
+                LastCompletedTaskDate = user.Tasks == null ? DateTime.MinValue : user.Tasks
                     .Where(task => task.Completed)
                     .OrderByDescending(task => task.CompletionDate)
                     .Select(task => task.CompletionDate)
@@ -133,5 +133,19 @@ public class DatabaseServices(IServiceScopeFactory scopeFactory)
         var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
         await dbService.BroadcastMessages.AddAsync(message);
         await dbService.SaveChangesAsync();
+    }
+    public async Task<BroadcastMessage[]> GetBroadcastMessagesAsync()
+    {
+        using var scope = scopeFactory.CreateScope();
+        var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+        return await dbService.BroadcastMessages.Where((message) => !message.Sent).ToArrayAsync();
+    }
+    
+    public async Task MessageUpdateAsync(BroadcastMessage message, CancellationToken token)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var dbService = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();
+        dbService.Update(message);
+        await dbService.SaveChangesAsync(token);
     }
 }

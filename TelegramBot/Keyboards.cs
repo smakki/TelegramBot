@@ -35,7 +35,8 @@ public class Keyboards
 
             case "Geolocation":
                 return new ReplyKeyboardMarkup(
-                    new KeyboardButton(Texts.SendLocation) { RequestLocation = true })
+                    new KeyboardButton(Texts.SendLocation) { RequestLocation = true },
+                    new KeyboardButton(Texts.Cancel))
                 {
                     ResizeKeyboard = true,
                     OneTimeKeyboard = true
@@ -57,7 +58,7 @@ public class Keyboards
                     [
                         new InlineKeyboardButton() { Text = Texts.TimeZone, CallbackData = $"settings-timezone" },
                         new InlineKeyboardButton()
-                            { Text = Texts.ReminderInterval, CallbackData = $"settings-interval-reminder" }
+                            { Text = Texts.ReminderInterval, CallbackData = $"settings-interval-reminder:{queryId}" }
                     ],
                     [
                         new InlineKeyboardButton() { Text = Texts.Cancel, CallbackData = $"cancel:{queryId}" }

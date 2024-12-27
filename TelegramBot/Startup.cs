@@ -1,14 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TelegramBot;
 
-public class Startup
+namespace TelegramBot;
+
+public class Startup(IServiceProvider serviceProvider)
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public Startup(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
     private static void SetParams()
     {
         AppContext.SetSwitch("System.Globalization.Invariant", true);
@@ -24,12 +19,10 @@ public class Startup
         {
             var pendingMigrations = dbContext.Database.GetPendingMigrations();
 
-            if (pendingMigrations.Any())
-            {
-                Console.WriteLine("Using migrations...");
-                dbContext.Database.Migrate();
-                Console.WriteLine("Migrations successfully applied.");
-            }
+            if (!pendingMigrations.Any()) return;
+            Console.WriteLine("Using migrations...");
+            dbContext.Database.Migrate();
+            Console.WriteLine("Migrations successfully applied.");
         }
         catch (Exception ex)
         {
@@ -40,13 +33,13 @@ public class Startup
 
     public void Initialize(string[] args)
     {
-        if (args.Count() > 0 && args[0] == "delete")
-            DeleteDatabase(_serviceProvider);
+        if (args.Length > 0 && args[0] == "delete")
+            DeleteDatabase();
         SetParams();
-        DoMigrate(_serviceProvider);
+        DoMigrate(serviceProvider);
     }
 
-    private void DeleteDatabase(IServiceProvider serviceProvider)
+    private void DeleteDatabase()
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<TelegramBotDbContext>();

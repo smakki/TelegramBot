@@ -30,5 +30,10 @@ public class DateTimeUtils
     {
         return interval.Minutes().Humanize();
     }
+
+    public static TimeZoneInfo? GetTimeZoneByOffset(int offset)
+    {
+        return TimeZoneInfo.GetSystemTimeZones() .FirstOrDefault(tz => tz.BaseUtcOffset == TimeSpan.FromHours(offset));
+    }
     
 }

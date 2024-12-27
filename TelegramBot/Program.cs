@@ -28,6 +28,18 @@ namespace TelegramBot
             builder.Services.AddSingleton<TelegramUtils>();
             builder.Services.AddSingleton<DateTimeUtils>();
             builder.Services.AddSingleton<RouteHandlers>();
+            builder.Services.AddSingleton<ReverseMarkdown.Converter>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    webBuilder =>
+                    {
+                        webBuilder.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    });
+            });
+            
             
             builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection(TelegramOptions.Telegram));
             
@@ -35,10 +47,10 @@ namespace TelegramBot
 
             var startup = new Startup(host.Services);
             startup.Initialize(args);
-
-            host.MapGet("/stats", (RouteHandlers handler, HttpContext context) =>handler.GetStatisticHandler(context));
-            host.MapGet("/users", (RouteHandlers handler, HttpContext context) =>handler.GetUsersHandler(context));
-            host.MapPost("/messages", (RouteHandlers handler, BroadcastMessage message) =>handler.PostMessageHandler(message));
+            host.UseCors("AllowAll");
+            host.MapGet("/api/stats", (RouteHandlers handler, HttpContext context) =>handler.GetStatisticHandler(context));
+            host.MapGet("/api/users", (RouteHandlers handler, HttpContext context) =>handler.GetUsersHandler(context));
+            host.MapPost("/api/messages", (RouteHandlers handler, BroadcastMessage message) =>handler.PostMessageHandler(message));
  
             host.Run();
         }

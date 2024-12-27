@@ -94,7 +94,7 @@ function App() {
                 height: 500,
                 menubar: false,
                 plugins: ['link', 'table', 'image', 'code', 'emoticons'],
-                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | emoticons'
+                toolbar: 'undo redo | bold italic underline forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | emoticons'
             }}/>
             <button onClick={handleClick}>Отправить POST запрос</button> {response && <p>Ответ сервера: {JSON.stringify(response)}</p>}
         </div>

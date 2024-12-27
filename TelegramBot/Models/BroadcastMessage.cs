@@ -9,5 +9,5 @@ public class BroadcastMessage
     public string? Message { get; set; }
     public DateTime AddedDate { get; set; }  = DateTime.UtcNow;
     public DateTime SendingDate { get; set; } = DateTime.UtcNow;
-    public bool Sent { get; set; } = false;
+    public bool Sent { get; set; }
 }

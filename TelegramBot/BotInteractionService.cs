@@ -3,16 +3,17 @@ using Hors.Models;
 using System.Collections.Concurrent;
 using Humanizer;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramBot.Models;
+using User = TelegramBot.Models.User;
 
 namespace TelegramBot;
 
-public class BotInteractionService(DatabaseServices dbService, TelegramUtils utils, DateTimeUtils dateTimeUtils)
+public class BotInteractionService(DatabaseServices dbService, TelegramUtils utils)
 {
     private readonly ConcurrentDictionary<string, UserTask> _usersTasks = [];
     private readonly ConcurrentDictionary<long, string> _usersSteps = [];
-    private readonly Dictionary<string, Func<CallbackQuery, CancellationToken, Task>> _callbackHandlers;
-
+    
     #region Sends
 
     private async Task SendStartMessage(long chatId, CancellationToken token)
@@ -47,10 +48,8 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         }
     }
 
-    private async Task SendConfirmTimeZoneMessage(long chatId, Location location, CancellationToken token)
+    private async Task SendConfirmTimeZoneMessage(long chatId, TimeZoneInfo tz, CancellationToken token)
     {
-        await dbService.AddLocationHistory(chatId, location, token);
-        var tz = DateTimeUtils.GetTimeZoneByGeoLocation(location.Latitude, location.Longitude).Result;
         _usersSteps.TryRemove(chatId, out _);
         var mes = string.Format(Texts.YourTimeZone, tz.DisplayName);
         await utils.SendTextMessage(chatId, mes, Keyboards.GetKeyboard("ConfirmTimeZone", tz.Id),
@@ -64,7 +63,9 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         {
             user.ReminderToTaskMinutes = interval;
             await dbService.UserUpdateAsync(user, token);
-            await SendSettingsMessage(chatId, messageId, token);
+            await utils.DeleteMessage(chatId, messageId, token);
+            await utils.DeleteMessage(chatId, messageId-1, token);
+            await SendSettingsMessage(chatId, messageId-2, token);
         }
     }
 
@@ -82,6 +83,11 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         await utils.SendTextMessage(task.TelegramId, notification,
             Keyboards.GetKeyboard("Notification", queryId), token);
     }
+    
+    public async Task SendCustomMessage(long chatid, string message, CancellationToken token)
+    {
+        await utils.SendTextMessage(chatid, message, null, token);
+    }
 
     private async Task SendClarificationMessage(long chatId, HorsParseResult task, CancellationToken token)
     {
@@ -96,6 +102,10 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         var taskDate = task.Dates.First().DateFrom;
 
         var user = dbService.GetUserById(chatId, token);
+        if (user == null)
+        {
+            return;
+        }
         _usersTasks.TryAdd(queryId, new UserTask(user, taskName, taskDate));
         var message = string.Format(Texts.Task, taskName, taskDate);
         await utils.SendTextMessage(chatId, message, Keyboards.GetKeyboard("Clarification", queryId), token);
@@ -158,7 +168,7 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         if (query.Message == null || query.Data == null) return;
         var chatId = query.Message.Chat.Id;
         var messageId = query.Message.Id;
-        if (query.Data.Split(':').Length == 2) queryId = query.Data.Split(':')[1];
+        if (query.Data.Split(':').Length >= 2) queryId = query.Data.Split(':')[1];
 
         switch (query.Data)
         {
@@ -292,13 +302,22 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
                 case var _ when nextStep.StartsWith("settings-interval-reminder"):
                     _usersSteps.TryRemove(chatId, out _);
                     if (int.TryParse(text, out var interval))
-                        await SendConfirmIntervalMessage(chatId, interval, messageId, token);
+                        await SendConfirmIntervalMessage(chatId, interval, message.Id, token);
                     else
                         await SendUnknownIntervalMessage(chatId, token);
 
                     break;
                 case "settings-timezone":
-
+                    _usersSteps.TryRemove(chatId, out _);
+                    if (int.TryParse(text, out var offset))
+                    {
+                        var tz = DateTimeUtils.GetTimeZoneByOffset(offset);
+                        await SendConfirmTimeZoneMessage(chatId, tz, token);
+                    } else if (text == Texts.Cancel)
+                    {
+                        await utils.DeleteMessage(chatId, message.Id, token);
+                        await utils.DeleteMessage(chatId, message.Id-1, token);
+                    }
                     break;
             }
 
@@ -315,6 +334,7 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
                 await SendActualTasksMessage(chatId, token);
                 break;
             case "/settings":
+                await utils.DeleteMessage(chatId, message.Id, token);
                 await SendSettingsMessage(chatId, 0, token);
                 break;
             default:
@@ -332,7 +352,11 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
         var chatId = message.Chat.Id;
         if (_usersSteps.TryGetValue(message.Chat.Id, out var nextStep))
             if (nextStep == "settings-timezone")
-                await SendConfirmTimeZoneMessage(chatId, location, token);
+            {
+                await dbService.AddLocationHistory(chatId, location, token);
+                var tz = DateTimeUtils.GetTimeZoneByGeoLocation(location.Latitude, location.Longitude).Result;
+                await SendConfirmTimeZoneMessage(chatId, tz, token);
+            }
     }
 
     #endregion
@@ -341,7 +365,7 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
     {
         var userTask = _usersTasks[queryId];
         var userZone = TimeZoneInfo.FindSystemTimeZoneById(userTask.User.TimeZone);
-        await dbService.AddUserTaskAsync(userTask.TelegramId, userTask, token);
+        await dbService.AddUserTaskAsync(userTask, token);
         var message = string.Format(Texts.NotificationSaveSuccess, userTask.Message,
             TimeZoneInfo.ConvertTimeFromUtc(userTask.TaskDate, userZone),
             TimeZoneInfo.ConvertTimeFromUtc(userTask.ReminderDate, userZone));

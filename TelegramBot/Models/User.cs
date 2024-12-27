@@ -23,6 +23,8 @@ namespace TelegramBot.Models
 
         public int ReminderToTaskMinutes{get; set;} = 60;
         public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
-        public List<UserTask>? Tasks { get; set; } = new ();
+        public List<UserTask>? Tasks { get; set; } = [];
+        public bool NotSendBroadcastMessages { get; set; } = false;
     }
+
 }
