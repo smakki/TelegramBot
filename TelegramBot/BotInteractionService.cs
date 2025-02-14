@@ -20,6 +20,8 @@ public class BotInteractionService(DatabaseServices dbService, TelegramUtils uti
     {
         var startMessage = Texts.StartMessages[new Random().Next(Texts.StartMessages.Length)];
         await utils.SendTextMessage(chatId, startMessage, Keyboards.GetKeyboard("Remove"), token);
+        Thread.Sleep(1000);
+        await utils.SendTextMessage(chatId, Texts.FirstSettings, Keyboards.GetKeyboard("Remove"), token);
     }
 
     public async Task SendReminder(UserTask task, CancellationToken token)
